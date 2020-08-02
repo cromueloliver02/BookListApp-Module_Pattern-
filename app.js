@@ -49,7 +49,7 @@ const StorageCtrl = (() => {
 				return book.id;
 			});
 
-			const index = books.indexOf(id);
+			const index = ids.indexOf(id);
 
 			books.splice(index, 1);
 
@@ -174,7 +174,8 @@ const UICtrl = (() => {
 		clearBtn: '.clear-btn',
 		booklistFilter: '#booklist-filter',
 		bookName: '.book-name',
-		author: '.author'
+		author: '.author',
+		booklistContainer: '.booklist-container'
 	};
 
 	return {
@@ -264,6 +265,12 @@ const UICtrl = (() => {
 			document.querySelector(selectors.btnDelete).style.display = 'inline-block';
 			document.querySelector(selectors.btnBack).style.display = 'inline-block';
 		},
+		hideBookList: () => {
+			document.querySelector(selectors.booklistContainer).style.display = 'none';
+		},
+		showBookList: () => {
+			document.querySelector(selectors.booklistContainer).style.display = 'block';
+		},
 		getSelectors: () => {
 			return selectors;
 		}
@@ -317,6 +324,9 @@ const App = ((StorageCtrl, BookCtrl, UICtrl, FormCtrl) => {
 			// Add book to LS
 			StorageCtrl.addBookLS(book);
 
+			// Show book list
+			UICtrl.showBookList();
+
 			// Clear fields
 			FormCtrl.clearFields();
 		}
@@ -347,17 +357,19 @@ const App = ((StorageCtrl, BookCtrl, UICtrl, FormCtrl) => {
 		// Get user input
 		const input = FormCtrl.getInput();
 
-		// Update book in data structure
-		const updatedBook = BookCtrl.updateBookData(input.bookName, input.author, input.year, input.isbn);
+		if (input.bookName !== '' && input.author !== '' && input.year !== '' && input.isbn !== '') {
+			// Update book in data structure
+			const updatedBook = BookCtrl.updateBookData(input.bookName, input.author, input.year, input.isbn);
 
-		// Update book in the UI from book list
-		UICtrl.updateBookUI(updatedBook);
+			// Update book in the UI from book list
+			UICtrl.updateBookUI(updatedBook);
 
-		// Update book in LS
-		StorageCtrl.updateBookLS(updatedBook);
+			// Update book in LS
+			StorageCtrl.updateBookLS(updatedBook);
 
-		// Show add state
-		UICtrl.showAddState();
+			// Show add state
+			UICtrl.showAddState();
+		}
 
 		e.preventDefault();
 	};
@@ -376,6 +388,11 @@ const App = ((StorageCtrl, BookCtrl, UICtrl, FormCtrl) => {
 		// Show add state
 		UICtrl.showAddState();
 
+		// Hide book list if books in LS is empty
+		if (StorageCtrl.getBooksLS().length === 0) {
+			UICtrl.hideBookList();
+		}
+
 		e.preventDefault();
 	};
 
@@ -389,6 +406,12 @@ const App = ((StorageCtrl, BookCtrl, UICtrl, FormCtrl) => {
 
 		// Clear all books in the LS
 		StorageCtrl.clearBooksLS();
+
+		// Show ad state
+		UICtrl.showAddState();
+
+		// Hide book list
+		UICtrl.hideBookList();
 
 		e.preventDefault();
 	};
@@ -461,6 +484,11 @@ const App = ((StorageCtrl, BookCtrl, UICtrl, FormCtrl) => {
 
 			// Show add state
 			UICtrl.showAddState();
+
+			// Hide book list if books in LS is empty
+			if (StorageCtrl.getBooksLS().length === 0) {
+				UICtrl.hideBookList();
+			}
 
 			// Load event listeners
 			loadEventListeners();
